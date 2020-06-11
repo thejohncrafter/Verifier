@@ -1,0 +1,21 @@
+
+(axiom_ext (forall x (forall y (then
+        (forall z (iff (in (var z) (var x)) (in (var z) (var y))))
+        (eq (var x) (var y))
+))))
+
+(axiom_empty (exists a (and
+    (exists C (in (var a) (var C)))
+    (forall x (not (in (var x) (var a))))
+)))
+
+(axiom_pair (forall x (forall y (then
+    (and (exists C (in (var x) (var C))) (exists C (in (var y) (var C))))
+    (exists a (and
+        (exists C (in (var a) (var C)))
+        (forall z (iff
+            (in (var z) (var a))
+            (or (eq (var z) (var x)) (eq (var z) (var y)))
+        ))
+    ))
+))))

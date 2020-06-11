@@ -1,0 +1,12 @@
+
+[package]
+name="tipe"
+version="0.0.0"
+
+[lib]
+crate-type=["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen="0.2"
+crossbeam-channel="0.3"
+notify="=5.0.0-pre.1"

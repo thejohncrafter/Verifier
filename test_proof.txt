@@ -1,0 +1,306 @@
+
+(prop A) (prop B) (prop C)
+(hyp H0 (and (then (var A) (var B)) (then (var B) (var C))))
+  (hyp A (var A))
+    (reg A_then_B (elim_and_l (get H0)))
+    (reg B_then_C (elim_and_r (get H0)))
+    (reg A (get A))
+    (reg B (elim_then (get A_then_B) (get A)))
+    (reg C (elim_then (get B_then_C) (get B)))
+  (then ccl C)
+(then ccl ccl)
+(so_forall ccl C ccl) (so_forall ccl B ccl) (so_forall chained_ponens A ccl)
+
+(scope)
+  (prop A)
+    (prop B)
+      (hyp H0 (and (var A) (var B)))
+        (reg ccl (intro_and (elim_and_r (get H0)) (elim_and_l (get H0))))
+      (then ccl ccl)
+    (so_forall ccl B ccl)
+  (so_forall forall_dir A ccl)
+  (prop A)
+    (prop B)
+      (reg dir (elim_so_forall (var B) (elim_so_forall (var A) (get forall_dir))))
+      (reg rec (elim_so_forall (var A) (elim_so_forall (var B) (get forall_dir))))
+      (reg commutator (intro_iff (get dir) (get rec)))
+    (so_forall commutator B commutator)
+  (so_forall and_commut A commutator)
+(conclude and_commut and_commut)
+
+(scope)
+  (term x) (term y)
+    (hyp H (and
+      (and (exists C (in (var x) (var C))) (forall z (not (in (var z) (var x)))))
+      (and (exists C (in (var y) (var C))) (forall z (not (in (var z) (var y)))))
+    ))
+      (term z)
+        (hyp z_in_x (in (var z) (var x)))
+          (reg not_z_in_x (elim_forall (var z) (elim_and_r (elim_and_l (get H)))))
+          (reg absurd (intro_bot (get z_in_x) (get not_z_in_x)))
+          (reg z_in_y (elim_bot (in (var z) (var y)) (get absurd)))
+        (then ccl z_in_y)
+      (forall ccl z ccl)
+    (then ccl ccl)
+  (forall ccl y ccl) (forall ccl x ccl)
+  (term x) (term y)
+    (hyp H (and
+      (and (exists C (in (var x) (var C))) (forall z (not (in (var z) (var x)))))
+      (and (exists C (in (var y) (var C))) (forall z (not (in (var z) (var y)))))
+    ))
+      (reg dir (elim_then (elim_forall (var y) (elim_forall (var x) (get ccl))) (get H)))
+      (reg comm
+        (elim_iff_r
+          (elim_so_forall
+            (and (exists C (in (var x) (var C))) (forall z (not (in (var z) (var x)))))
+            (elim_so_forall
+              (and (exists C (in (var y) (var C))) (forall z (not (in (var z) (var y)))))
+              (get and_commut)
+            )
+          )
+        )
+      )
+      (reg rec
+        (elim_then
+          (elim_forall (var x) (elim_forall (var y) (get ccl)))
+          (elim_then
+            (get comm)
+            (get H)
+          )
+        )
+      )
+      (term z)
+        (reg in_x_iff_in_y (intro_iff
+          (elim_forall (var z) (get dir))
+          (elim_forall (var z) (get rec))
+        ))
+      (forall in_x_iff_in_y z in_x_iff_in_y)
+      (reg ext (elim_forall (var y) (elim_forall (var x) (get axiom_ext))))
+      (reg x_eq_y (elim_then (get ext) (get in_x_iff_in_y)))
+    (then ccl x_eq_y)
+  (forall ccl y ccl) (forall unique y ccl)
+  (reg unique (intro_and (get axiom_empty) (get unique)))
+  (reg unique (intro_exists_unique
+    x
+    (and (exists C (in (var x) (var C))) (forall z (not (in (var z) (var x)))))
+    (get unique)
+  ))
+(conclude empty_unique unique)
+
+(scope)
+  (hyp H (top))
+    (reg ccl (get empty_unique))
+  (then unique_op_prop ccl)
+  (make_op ∅ 0 (get unique_op_prop))
+(conclude_op ∅ ∅)
+
+(scope)
+  (term x) (term y)
+    (hyp x_y_sets (and (exists C (in (var x) (var C))) (exists C (in (var y) (var C)))))
+      (term a) (term b)
+        (hyp a_b_pairs
+          (and
+            (and
+              (exists C (in (var a) (var C)))
+              (forall z (iff (in (var z) (var a)) (or (eq (var z) (var x)) (eq (var z) (var y)))))
+            )
+            (and
+              (exists C (in (var b) (var C)))
+              (forall z (iff (in (var z) (var b)) (or (eq (var z) (var x)) (eq (var z) (var y)))))
+            )
+          )
+        )
+        (reg a_is_pair (elim_and_r (elim_and_l (get a_b_pairs))))
+        (reg b_is_pair (elim_and_r (elim_and_r (get a_b_pairs))))
+        (term z)
+          (hyp z_in_a (in (var z) (var a)))
+          (reg test (elim_iff_l (elim_forall (var z) (get a_is_pair))))
+          (reg cases (elim_then
+            (elim_iff_l (elim_forall (var z) (get a_is_pair)))
+            (get z_in_a)
+          ))
+          (switch
+            (get cases)
+            z_is_x (eq (var z) (var x))
+            z_is_y (eq (var z) (var y))
+          )
+            (reg a (elim_iff_r (elim_forall (var z) (get b_is_pair))))
+            (reg b (intro_or_l (get z_is_x) (eq (var z) (var y))))
+            (reg c (elim_then (get a) (get b)))
+          (ccl_and_switch (get c))
+            (reg a (elim_iff_r (elim_forall (var z) (get b_is_pair))))
+            (reg b (intro_or_r (eq (var z) (var x)) (get z_is_y)))
+            (reg c (elim_then (get a) (get b)))
+          (ccl_and_elim z_in_b (get c))
+        (then in_a_then_in_b z_in_b)
+        (forall in_a_then_in_b z in_a_then_in_b)
+      (then ccl in_a_then_in_b)
+      (forall ccl b ccl) (forall forall_incl a ccl)
+      (term a) (term b)
+        (hyp a_b_pairs
+          (and
+            (and
+              (exists C (in (var a) (var C)))
+              (forall z (iff (in (var z) (var a)) (or (eq (var z) (var x)) (eq (var z) (var y)))))
+            )
+            (and
+              (exists C (in (var b) (var C)))
+              (forall z (iff (in (var z) (var b)) (or (eq (var z) (var x)) (eq (var z) (var y)))))
+            )
+          )
+        )
+          (reg a_incl_b
+            (elim_then
+              (elim_forall (var b) (elim_forall (var a) (get forall_incl)))
+              (get a_b_pairs)
+            )
+          )
+          (reg commutated
+            (elim_then
+              (elim_iff_l
+                (elim_so_forall
+                  (and
+                    (exists C (in (var b) (var C)))
+                    (forall z (iff
+                      (in (var z) (var b))
+                      (or (eq (var z) (var x)) (eq (var z) (var y)))
+                    ))
+                  )
+                  (elim_so_forall
+                    (and
+                      (exists C (in (var a) (var C)))
+                      (forall z (iff
+                        (in (var z) (var a))
+                        (or (eq (var z) (var x)) (eq (var z) (var y)))
+                      ))
+                    )
+                    (get and_commut)
+                  )
+                )
+              )
+              (get a_b_pairs)
+            )
+          )
+          (reg b_incl_a
+            (elim_then
+              (elim_forall (var a) (elim_forall (var b) (get forall_incl)))
+              (get commutated)
+            )
+          )
+          (term z)
+            (reg ccl (intro_iff
+              (elim_forall (var z) (get a_incl_b))
+              (elim_forall (var z) (get b_incl_a))
+            ))
+          (forall in_a_iff_in_b z ccl)
+          (reg a_eq_b (elim_then
+            (elim_forall (var b) (elim_forall (var a) (get axiom_ext)))
+            (get in_a_iff_in_b)
+          ))
+        (then ccl a_eq_b)
+      (forall ccl b ccl) (forall pair_unique a ccl)
+      (reg pair_unique
+        (intro_exists_unique
+            a
+            (and
+              (exists C (in (var a) (var C)))
+              (forall z (iff (in (var z) (var a)) (or (eq (var z) (var x)) (eq (var z) (var y)))))
+            )
+            (intro_and
+              (elim_then (elim_forall (var y) (elim_forall (var x) (get axiom_pair))) (get x_y_sets))
+              (get pair_unique)
+            )
+        )
+      )
+    (then ccl pair_unique)
+  (forall ccl y ccl) (forall pair_def x ccl)
+(conclude pair_unique pair_def)
+
+(scope)
+  (make_op pair 2 (get pair_unique))
+(conclude_op pair pair)
+
+(scope)
+  (prop A) (prop B) (prop C)
+  (hyp both_iff (and (iff (var A) (var C)) (iff (var B) (var C))))
+    (reg A_iff_C (elim_and_l (get both_iff)))
+    (reg B_iff_C (elim_and_r (get both_iff)))
+    (hyp A (var A))
+      (reg B
+        (elim_then
+          (elim_iff_r (get B_iff_C))
+          (elim_then (elim_iff_l (get A_iff_C)) (get A))
+        )
+      )
+    (then A_then_B B)
+    (hyp B (var B))
+      (reg A
+        (elim_then
+          (elim_iff_r (get A_iff_C))
+          (elim_then (elim_iff_l (get B_iff_C)) (get B))
+        )
+      )
+      (then B_then_A A)
+      (reg A_iff_B (intro_iff (get A_then_B) (get B_then_A)))
+    (then ccl A_iff_B)
+  (so_forall ccl C ccl) (so_forall ccl B ccl) (so_forall ccl A ccl)
+(conclude iff_trans ccl)
+
+(scope)
+  (term x)
+    (hyp x_is_set (exists C (in (var x) (var C))))
+      (term a) (term b)
+        (hyp a_b_sing
+          (and
+            (and
+              (exists C (in (var a) (var C)))
+              (forall z (iff (in (var z) (var a)) (eq (var z) (var x))))
+            )
+            (and
+              (exists C (in (var b) (var C)))
+              (forall z (iff (in (var z) (var b)) (eq (var z) (var x)) ))
+            )
+          )
+        )
+        (reg a_is_sing (elim_and_r (elim_and_l (get a_b_sing))))
+        (reg b_is_sing (elim_and_r (elim_and_r (get a_b_sing))))
+        (term z)
+          (reg a_iff_x (elim_forall (var z) (get a_is_sing)))
+          (reg b_iff_x (elim_forall (var z) (get b_is_sing)))
+          (reg ccl (elim_then
+            (elim_so_forall (eq (var z) (var x)) (
+              elim_so_forall (in (var z) (var b)) (
+                elim_so_forall (in (var z) (var a)) (get iff_trans)
+              )
+            ))
+            (intro_and
+              (elim_forall (var z) (get a_is_sing))
+              (elim_forall (var z) (get b_is_sing))
+            )
+          ))
+        (forall in_a_iff_in_b z ccl)
+        (reg a_is_b (elim_then
+          (elim_forall (var b) (elim_forall (var a) (get axiom_ext)))
+          (get in_a_iff_in_b)
+        ))
+      (then ccl a_is_b)
+      (reg u (elim_then
+        (elim_forall (var x) (elim_forall (var x) (get axiom_pair)))
+        (intro_and (get x_is_set) (get x_is_set))
+      ))
+      (print u)
+
+      #(reg sing_unique (intro_exists_unique
+      #  a
+      #  (and
+      #    (exists C (in (var a) (var C)))
+      #    (forall y (then (in (var y) (var a)) (eq (var y) (var x))))
+      #  )
+      #  (intro_and
+      #    (elim_then
+      #      (elim_forall (var x) (elim_forall (var x) (get axiom_pair)))
+      #      (intro_and (get x_is_set) (get x_is_set))
+      #    )
+      #    (get ccl)
+      #  )
+      #))

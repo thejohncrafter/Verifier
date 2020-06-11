@@ -1,0 +1,396 @@
+
+(rule var_is_term
+    (
+        (var x)
+    )
+    (
+        (sequent (meta gamma) none)
+    )
+    (sequent (cons (truth (fun t_term ((var x)))) (cons (intro x) (meta gamma))) none)
+)
+(rule var_is_prop
+    (
+        (var x)
+    )
+    (
+        (sequent (meta gamma) none)
+    )
+    (sequent (cons (truth (fun t_prop ((var x)))) (cons (intro x) (meta gamma))) none)
+)
+
+(rule top_is_prop
+    ()
+    (
+        (sequent (meta gamma) none)
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_top ()))))
+)
+(rule bot_is_prop
+    ()
+    (
+        (sequent (meta gamma) none)
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_bot ()))))
+)
+
+(rule eq_is_prop
+    ()
+    (
+        (sequent (meta gamma) (fun t_term ((meta x))))
+        (sequent (meta gamma) (fun t_term ((meta y))))
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_eq ((meta x) (meta y))))))
+)
+(rule in_is_prop
+    ()
+    (
+        (sequent (meta gamma) (fun t_term ((meta x))))
+        (sequent (meta gamma) (fun t_term ((meta y))))
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_in ((meta x) (meta y))))))
+)
+
+(rule so_forall_is_prop
+    (
+        (var y)
+    )
+    (
+        (sequent
+            (cons (truth (fun t_prop ((var x)))) (cons (intro x) (meta gamma)))
+            (fun t_prop ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_prop ((qua t_so_forall y (replace (meta P) x (var y))))))
+)
+(rule forall_is_prop
+    (
+        (var y)
+    )
+    (
+        (sequent
+            (cons (truth (fun t_term ((var x)))) (cons (intro x) (meta gamma)))
+            (fun t_prop ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_prop ((qua t_forall y (replace (meta P) x (var y))))))
+)
+(rule exists_is_prop
+    (
+        (var y)
+    )
+    (
+        (sequent
+            (cons (truth (fun t_term ((var x)))) (cons (intro x) (meta gamma)))
+            (fun t_prop ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_prop ((qua t_exists y (replace (meta P) x (var y))))))
+)
+(rule exists_unique_is_prop
+    (
+        (var y)
+    )
+    (
+        (sequent
+            (cons (truth (fun t_term ((var x)))) (cons (intro x) (meta gamma)))
+            (fun t_prop ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_prop ((
+        qua t_exists_unique y (replace (meta P) x (var y))
+    ))))
+)
+
+(rule and_is_prop
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+        (sequent (meta gamma) (fun t_prop ((meta Q))))
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_and ((meta P) (meta Q))))))
+)
+(rule or_is_prop
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+        (sequent (meta gamma) (fun t_prop ((meta Q))))
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_or ((meta P) (meta Q))))))
+)
+(rule then_is_prop
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+        (sequent (meta gamma) (fun t_prop ((meta Q))))
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_then ((meta P) (meta Q))))))
+)
+(rule iff_is_prop
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+        (sequent (meta gamma) (fun t_prop ((meta Q))))
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_iff ((meta P) (meta Q))))))
+)
+(rule not_is_prop
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+    )
+    (sequent (meta gamma) (fun t_prop ((fun t_not ((meta P))))))
+)
+
+(rule intro_hyp
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+    )
+    (sequent (cons (truth (fun t_true ((meta P)))) (meta gamma)) none)
+)
+
+(rule intro_so_forall
+    (
+        (var y)
+    )
+    (
+        (sequent
+            (cons (truth (fun t_prop ((var x)))) (cons (intro x) (meta gamma)))
+            (fun t_true ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_true ((qua t_so_forall y (replace (meta P) x (var y))))))
+)
+(rule elim_so_forall
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta t))))
+        (sequent (meta gamma) (fun t_true ((qua t_so_forall x (meta P)))))
+    )
+    (sequent (meta gamma) (fun t_true ((replace (meta P) x (meta t)))))
+)
+(rule intro_forall
+    (
+        (var y)
+    )
+    (
+        (sequent
+            (cons (truth (fun t_term ((var x)))) (cons (intro x) (meta gamma)))
+            (fun t_true ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_true ((qua t_forall y (replace (meta P) x (var y))))))
+)
+(rule elim_forall
+    ()
+    (
+        (sequent (meta gamma) (fun t_term ((meta t))))
+        (sequent (meta gamma) (fun t_true ((qua t_forall x (meta P)))))
+    )
+    (sequent (meta gamma) (fun t_true ((replace (meta P) x (meta t)))))
+)
+(rule intro_exists
+    (
+        (var y)
+    )
+    (
+        (sequent (meta gamma) (fun t_term ((meta t))))
+        (sequent
+            (cons (truth (fun t_term ((var x)))) (cons (intro x) (meta gamma)))
+            (fun t_prop ((meta P)))
+        )
+        (sequent (meta gamma) (fun t_true ((replace (meta P) x (meta t)))))
+    )
+    (sequent (meta gamma) (fun t_true ((
+        qua t_exists y (replace (meta P) x (var y))
+    ))))
+)
+(rule elim_exists
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+        (sequent (meta gamma) (fun t_true ((
+            qua t_exists x (meta F)
+        ))))
+        (sequent
+            (cons
+                (truth (fun t_true ((replace (meta F) x (var y)))))
+                (cons (truth (fun t_term ((var y)))) (cons (intro y) (meta gamma)))
+            )
+            (fun t_true ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_true ((meta P))))
+)
+(rule intro_exists_unique
+    (
+        (var w)
+    )
+    (
+        (sequent
+            (cons (truth (fun t_term ((var u)))) (cons (intro u) (meta gamma)))
+            (fun t_prop ((meta P)))
+        )
+        (sequent (meta gamma) (fun t_true ((
+            fun t_and (
+                (qua t_exists v (replace (meta P) u (var v)))
+                (qua t_forall y (qua t_forall z (
+                    fun t_then (
+                        (fun t_and (
+                            (replace (meta P) u (var y))
+                            (replace (meta P) u (var z))
+                        ))
+                        (fun t_eq ((var y) (var z)))
+                    )
+                )))
+            )
+        ))))
+    )
+    (sequent (meta gamma) (fun t_true ((
+        qua t_exists_unique w (replace (meta P) u (var w))
+    ))))
+)
+(rule elim_exists_unique
+    (
+        (var x)
+        (var y)
+    )
+    (
+        (sequent (meta gamma) (fun t_true ((qua t_exists_unique u (meta P)))))
+    )
+    (sequent (meta gamma) (fun t_true ((
+        fun t_and (
+            (qua t_exists u (meta P))
+            (qua t_forall x (qua t_forall y (
+                fun t_then (
+                    (fun t_and (
+                        (replace (meta P) u (var x))
+                        (replace (meta P) u (var y))
+                    ))
+                    (fun t_eq ((var x) (var y)))
+                )
+            )))
+        )
+    ))))
+)
+
+(rule intro_top
+    ()
+    (
+        (sequent (meta gamma) none)
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_top ()))))
+)
+(rule intro_bot
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((meta P))))
+        (sequent (meta gamma) (fun t_true ((fun t_not ((meta P))))))
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_bot ()))))
+)
+(rule elim_bot
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+        (sequent (meta gamma) (fun t_true ((fun t_bot ()))))
+    )
+    (sequent (meta gamma) (fun t_true ((meta P))))
+)
+
+(rule intro_and
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((meta P))))
+        (sequent (meta gamma) (fun t_true ((meta Q))))
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_and ((meta P) (meta Q))))))
+)
+(rule elim_and_l
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((fun t_and ((meta P) (meta Q))))))
+    )
+    (sequent (meta gamma) (fun t_true ((meta P))))
+)
+(rule elim_and_r
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((fun t_and ((meta P) (meta Q))))))
+    )
+    (sequent (meta gamma) (fun t_true ((meta Q))))
+)
+
+(rule intro_or_l
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((meta P))))
+        (sequent (meta gamma) (fun t_prop ((meta Q))))
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_or ((meta P) (meta Q))))))
+)
+(rule intro_or_r
+    ()
+    (
+        (sequent (meta gamma) (fun t_prop ((meta P))))
+        (sequent (meta gamma) (fun t_true ((meta Q))))
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_or ((meta P) (meta Q))))))
+)
+(rule elim_or
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((fun t_or ((meta P) (meta Q))))))
+        (sequent
+            (cons (truth (fun t_true ((meta P)))) (meta gamma))
+            (fun t_true ((meta H)))
+        )
+        (sequent
+            (cons (truth (fun t_true ((meta Q)))) (meta gamma))
+            (fun t_true ((meta H)))
+        )
+    )
+    (sequent (meta gamma) (fun t_true ((meta H))))
+)
+
+(rule intro_then
+    ()
+    (
+        (sequent
+            (cons (truth (fun t_true ((meta H)))) (meta gamma))
+            (fun t_true ((meta P)))
+        )
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_then ((meta H) (meta P))))))
+)
+(rule elim_then
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((fun t_then ((meta H) (meta P))))))
+        (sequent (meta gamma) (fun t_true ((meta H))))
+    )
+    (sequent (meta gamma) (fun t_true ((meta P))))
+)
+
+(rule intro_iff
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((fun t_then ((meta P) (meta Q))))))
+        (sequent (meta gamma) (fun t_true ((fun t_then ((meta Q) (meta P))))))
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_iff ((meta P) (meta Q))))))
+)
+(rule elim_iff_l
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((fun t_iff ((meta P) (meta Q))))))
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_then ((meta P) (meta Q))))))
+)
+(rule elim_iff_r
+    ()
+    (
+        (sequent (meta gamma) (fun t_true ((fun t_iff ((meta P) (meta Q))))))
+    )
+    (sequent (meta gamma) (fun t_true ((fun t_then ((meta Q) (meta P))))))
+)
