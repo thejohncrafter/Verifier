@@ -294,7 +294,7 @@ impl<'a> Matcher<'a> {
                 let mut built_args: Vec<Box<Term>> = Vec::with_capacity(args.len());
                 args.iter().try_for_each(|p| {
                     built_args.push(self.build_term(p)?);
-                    Ok(())
+                    Some(())
                 })?;
                 Some(Box::new(Term::Fun(Rc::clone(te), built_args)))
             },
